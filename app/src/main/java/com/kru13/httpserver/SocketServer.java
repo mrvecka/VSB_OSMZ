@@ -17,7 +17,8 @@ import android.os.Environment;
 import android.util.Log;
 
 public class SocketServer extends Thread {
-	
+
+	public static String NEWLINE = "\r\n";
 	ServerSocket serverSocket;
 	public final int port = 12345;
 	boolean bRunning;
@@ -60,27 +61,29 @@ public class SocketServer extends Thread {
 					{
 						String fileName = header[1].substring(header[1].lastIndexOf("/")+1);
 						File outFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),fileName);
-						//TODO nemam prava na ten subor
 						if (outFile.exists())
 						{
 							BufferedReader outFileStream = new BufferedReader(new InputStreamReader(new FileInputStream(outFile)));
 							StringBuilder strBuilder = new StringBuilder();
 							int fileLength = 0;
-							while(!(response = outFileStream.readLine()).isEmpty())
+							while((response = outFileStream.readLine()) != null)
 							{
-								response = response + "\n";
-								fileLength += response.length();
-								strBuilder.append(response);
+								if (!response.isEmpty())
+								{
+									response = response + NEWLINE;
+									fileLength += response.length();
+									strBuilder.append(response);
+								}
 							}
 							outFileStream.close();
-							out.write(header[2] + " 200 OK");
-							out.write("Date: "+Calendar.getInstance().getTime());
-							out.write("Server: localhost/12345");
-							out.write("Content-Length: " + fileLength);
-							out.write("Connection: Closed");
-							out.write("Content-Type: text/html");
-							out.write("");
-							out.write(strBuilder.toString());
+							out.write(header[2] + " 200 OK"+ NEWLINE);
+							out.write("Date: "+Calendar.getInstance().getTime()+ NEWLINE);
+							out.write("Server: localhost/12345"+ NEWLINE);
+							out.write("Content-Length: " + fileLength+ NEWLINE);
+							out.write("Connection: Closed"+ NEWLINE);
+							out.write("Content-Type: text/html"+ NEWLINE);
+							out.write(NEWLINE);
+							out.write(strBuilder.toString()+ NEWLINE);
 							out.flush();
 						}
 						else
@@ -89,21 +92,24 @@ public class SocketServer extends Thread {
 							BufferedReader outFileStream = new BufferedReader(new InputStreamReader(new FileInputStream(notFoundFile)));
 							StringBuilder strBuilder = new StringBuilder();
 							int fileLength = 0;
-							while(!(response = outFileStream.readLine()).isEmpty())
+							while((response = outFileStream.readLine()) != null)
 							{
-								response = response + "\n";
-								fileLength += response.length();
-								strBuilder.append(response);
+								if (!response.isEmpty())
+								{
+									response = response + NEWLINE;
+									fileLength += response.length();
+									strBuilder.append(response);
+								}
 							}
 							outFileStream.close();
-							out.write(header[2] + " 404 Not Found");
-							out.write("Date: "+Calendar.getInstance().getTime());
-							out.write("Server: localhost/12345");
-							out.write("Content-Length: " + fileLength);
-							out.write("Connection: Closed");
-							out.write("Content-Type: text/html");
-							out.write("");
-							out.write(strBuilder.toString());
+							out.write(header[2] + " 404 Not Found"+ NEWLINE);
+							out.write("Date: "+Calendar.getInstance().getTime()+ NEWLINE);
+							out.write("Server: localhost/12345"+ NEWLINE);
+							out.write("Content-Length: " + fileLength+ NEWLINE);
+							out.write("Connection: Closed"+ NEWLINE);
+							out.write("Content-Type: text/html"+ NEWLINE);
+							out.write(NEWLINE);
+							out.write(strBuilder.toString()+ NEWLINE);
 							out.flush();
 							Log.d("SERVER","File not found");
 						}
@@ -136,6 +142,10 @@ public class SocketServer extends Thread {
             	e.printStackTrace();
             }
         }
+        catch (Exception e)
+		{
+			Log.d("SERVER",e.toString());
+		}
         finally {
         	serverSocket = null;
         	bRunning = false;
