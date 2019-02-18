@@ -18,11 +18,9 @@ import android.util.Log;
 
 public class SocketServer extends Thread {
 
-	public static String NEWLINE = "\r\n";
 	ServerSocket serverSocket;
-	public final int port = 12345;
-	boolean bRunning;
-	
+	private final int port = 12345;
+
 	public void close() {
 		try {
 			serverSocket.close();
@@ -30,126 +28,26 @@ public class SocketServer extends Thread {
 			Log.d("SERVER", "Error, probably interrupted in accept(), see log");
 			e.printStackTrace();
 		}
-		bRunning = false;
 	}
 	
 	public void run() {
-        try {
-        	Log.d("SERVER", "Creating Socket");
-            serverSocket = new ServerSocket(port);
-            bRunning = true;
-            while (bRunning) {
-            	Log.d("SERVER", "Socket Waiting for connection");
-                Socket s = serverSocket.accept(); 
-                Log.d("SERVER", "Socket Accepted");
-                
-                OutputStream o = s.getOutputStream();
-	        	BufferedWriter out = new BufferedWriter(new OutputStreamWriter(o));
-	        	BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 
-				ArrayList<String> responses = new ArrayList<String>();
-	        	String response;
-	            while(!(response = in.readLine()).isEmpty())
-				{
-					responses.add(response);
-					Log.d("SERVER",response);
-				}
-				if(!responses.isEmpty())
-				{
-					String header[] = responses.get(0).split(" ");
-					if (header[0].toUpperCase().equals("GET"))
-					{
-						String fileName = header[1].substring(header[1].lastIndexOf("/")+1);
-						File outFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),fileName);
-						if (outFile.exists())
-						{
-							BufferedReader outFileStream = new BufferedReader(new InputStreamReader(new FileInputStream(outFile)));
-							StringBuilder strBuilder = new StringBuilder();
-							int fileLength = 0;
-							while((response = outFileStream.readLine()) != null)
-							{
-								if (!response.isEmpty())
-								{
-									response = response + NEWLINE;
-									fileLength += response.length();
-									strBuilder.append(response);
-								}
-							}
-							outFileStream.close();
-							out.write(header[2] + " 200 OK"+ NEWLINE);
-							out.write("Date: "+Calendar.getInstance().getTime()+ NEWLINE);
-							out.write("Server: localhost/12345"+ NEWLINE);
-							out.write("Content-Length: " + fileLength+ NEWLINE);
-							out.write("Connection: Closed"+ NEWLINE);
-							out.write("Content-Type: text/html"+ NEWLINE);
-							out.write(NEWLINE);
-							out.write(strBuilder.toString()+ NEWLINE);
-							out.flush();
-						}
-						else
-						{
-							File notFoundFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),"notFound.html");
-							BufferedReader outFileStream = new BufferedReader(new InputStreamReader(new FileInputStream(notFoundFile)));
-							StringBuilder strBuilder = new StringBuilder();
-							int fileLength = 0;
-							while((response = outFileStream.readLine()) != null)
-							{
-								if (!response.isEmpty())
-								{
-									response = response + NEWLINE;
-									fileLength += response.length();
-									strBuilder.append(response);
-								}
-							}
-							outFileStream.close();
-							out.write(header[2] + " 404 Not Found"+ NEWLINE);
-							out.write("Date: "+Calendar.getInstance().getTime()+ NEWLINE);
-							out.write("Server: localhost/12345"+ NEWLINE);
-							out.write("Content-Length: " + fileLength+ NEWLINE);
-							out.write("Connection: Closed"+ NEWLINE);
-							out.write("Content-Type: text/html"+ NEWLINE);
-							out.write(NEWLINE);
-							out.write(strBuilder.toString()+ NEWLINE);
-							out.flush();
-							Log.d("SERVER","File not found");
-						}
-					}
-					else if(header[0].toUpperCase().equals("PUT"))
-					{
-						Log.d("SERVER","Put methode");
+		Log.d("SERVER", "Creating Socket");
+		try {
+			serverSocket = new ServerSocket(port);
+			ClientHandler client = new ClientHandler(serverSocket);
+			client.run();
+			//client.join();
 
-					}
-					else
-					{
-						Log.d("SERVER","bad request methode!");
-					}
-
-				}
-				else
-				{
-
-				}
-	            
-                s.close();
-                Log.d("SERVER", "Socket Closed");
-            }
-        } 
-        catch (IOException e) {
-            if (serverSocket != null && serverSocket.isClosed())
-            	Log.d("SERVER", "Normal exit");
-            else {
-            	Log.d("SERVER", "Error");
-            	e.printStackTrace();
-            }
-        }
-        catch (Exception e)
-		{
-			Log.d("SERVER",e.toString());
+		} catch (IOException e) {
+			if (serverSocket != null && serverSocket.isClosed())
+				Log.d("SERVER", "Normal exit");
+			else {
+				Log.d("SERVER", "Error");
+				e.printStackTrace();
+			}
 		}
-        finally {
-        	serverSocket = null;
-        	bRunning = false;
-        }
-    }
+
+	}
 
 }
