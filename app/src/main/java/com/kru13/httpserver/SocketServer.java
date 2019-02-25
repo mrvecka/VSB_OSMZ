@@ -13,12 +13,22 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
+import android.widget.TextView;
 
 public class SocketServer extends Thread {
 
+    public SocketServer(Handler h)
+    {
+        this.messageHandler = h;
+    }
+
 	ServerSocket serverSocket;
+    Handler messageHandler;
 	private final int port = 12345;
 
 	public void close() {
@@ -35,9 +45,9 @@ public class SocketServer extends Thread {
 		Log.d("SERVER", "Creating Socket");
 		try {
 			serverSocket = new ServerSocket(port);
-			ClientHandler client = new ClientHandler(serverSocket);
+			ClientHandler client = new ClientHandler(serverSocket, messageHandler);
 			client.run();
-			//client.join();
+
 
 		} catch (IOException e) {
 			if (serverSocket != null && serverSocket.isClosed())

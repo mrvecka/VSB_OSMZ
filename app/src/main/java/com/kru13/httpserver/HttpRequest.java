@@ -1,8 +1,9 @@
 package com.kru13.httpserver;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class HttpRequest
+public class HttpRequest implements Serializable
 {
     public String Method;
     public String Path;
@@ -16,7 +17,6 @@ public class HttpRequest
     public String Accept;
     public String Accept_Encoding;
     public String Accept_Language;
-
 
     public static HttpRequest ParseRequest(ArrayList<String> responses)
     {
