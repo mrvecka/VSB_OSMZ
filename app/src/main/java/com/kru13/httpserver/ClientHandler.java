@@ -35,6 +35,7 @@ public class ClientHandler extends Thread {
             while (bRunning) {
                 Log.d("SERVER", "Socket Waiting for connection");
                 Socket s = serverSocket.accept();
+                new ClientHandler(serverSocket).start();
                 Log.d("SERVER", "Socket Accepted");
 
                 OutputStream o = s.getOutputStream();
@@ -48,16 +49,15 @@ public class ClientHandler extends Thread {
                     responses.add(response);
                     Log.d("SERVER",response);
                 }
-                if(!responses.isEmpty())
+                HttpRequest request = HttpRequest.ParseRequest(responses);
+                if(request != null)
                 {
-                    String header[] = responses.get(0).split(" ");
-                    if (header[0].toUpperCase().equals("GET"))
+                    if (request.Method.toUpperCase() == "GET")
                     {
-                        String fileName = header[1].substring(header[1].lastIndexOf("/")+1);
-                        File outFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),fileName);
+                        File outFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),request.FileName);
                         if (outFile.exists())
                         {
-                            out.write("HTTP/1.0 200 OK"+ NEWLINE);
+                            out.write(request.HttpVersion + " 200 OK"+ NEWLINE);
                             out.write("Date: "+Calendar.getInstance().getTime()+ NEWLINE);
                             out.write("Server: localhost/12345"+ NEWLINE);
                             out.write("Content-Length: " + String.valueOf(outFile.length())+ NEWLINE);
@@ -77,7 +77,7 @@ public class ClientHandler extends Thread {
                         else
                         {
                             File notFoundFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),"notFound.html");
-                            out.write(header[2] + " 404 Not Found"+ NEWLINE);
+                            out.write(request.HttpVersion + " 404 Not Found"+ NEWLINE);
                             out.write("Date: "+Calendar.getInstance().getTime()+ NEWLINE);
                             out.write("Server: localhost/12345"+ NEWLINE);
                             out.write("Content-Length: " + String.valueOf(notFoundFile.length())+ NEWLINE);
@@ -97,7 +97,7 @@ public class ClientHandler extends Thread {
                             Log.d("SERVER","File not found");
                         }
                     }
-                    else if(header[0].toUpperCase().equals("PUT"))
+                    else if(request.Method.toUpperCase().equals("PUT"))
                     {
                         Log.d("SERVER","Put methode");
 
