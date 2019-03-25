@@ -13,6 +13,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -22,18 +23,25 @@ import android.widget.TextView;
 
 public class SocketServer extends Thread {
 
-    public SocketServer(Handler h)
-    {
-        this.messageHandler = h;
-    }
-
 	ServerSocket serverSocket;
     Handler messageHandler;
+	HttpServerActivity activity;
+	private Camera camera;
+
 	private final int port = 12345;
+    public SocketServer(Handler h, HttpServerActivity act)
+    {
+        this.messageHandler = h;
+		this.activity = act;
+    }
+
 
 	public void close() {
 		try {
-			serverSocket.close();
+			if (!serverSocket.isClosed())
+			{
+				serverSocket.close();
+			}
 		} catch (IOException e) {
 			Log.d("SERVER", "Error, probably interrupted in accept(), see log");
 			e.printStackTrace();
@@ -45,7 +53,7 @@ public class SocketServer extends Thread {
 		Log.d("SERVER", "Creating Socket");
 		try {
 			serverSocket = new ServerSocket(port);
-			ClientHandler client = new ClientHandler(serverSocket, messageHandler);
+			ClientHandler client = new ClientHandler(serverSocket, this.messageHandler,this.activity);
 			client.run();
 
 

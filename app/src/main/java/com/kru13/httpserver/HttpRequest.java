@@ -11,12 +11,8 @@ public class HttpRequest implements Serializable
     public String HttpVersion;
     public String Host;
     public String Connection;
-    public String Purpose;
-    public String Upgrade_Insecure_Requests;
-    public String User_Agent;
-    public String Accept;
-    public String Accept_Encoding;
-    public String Accept_Language;
+    public String Command;
+
 
     public static HttpRequest ParseRequest(ArrayList<String> responses)
     {
@@ -32,42 +28,16 @@ public class HttpRequest implements Serializable
                 request.Method = header[0];
                 request.Path = header[1];
                 request.HttpVersion = header[2];
-                request.FileName = header[1].substring(header[1].lastIndexOf("/")+1);
+                request.FileName = header[1].substring(header[1].indexOf('/')+1);
+                request.Host = res;
+                if (header[1].indexOf("/cgi-bin") != -1)
+                {
+                    request.Command = header[1].substring(header[1].indexOf("/cgi-bin")+9);
+                }
+                else
+                    request.Command = "";
 
-            }else if(res.contains("Host:"))
-            {
-                String param = res.substring(res.indexOf(" "));
-                request.Host = param;
-            }else if(res.contains("Connection:"))
-            {
-                String param = res.substring(res.indexOf(" "));
-                request.Connection = param;
-            }else if(res.contains("Purpose:"))
-            {
-                String param = res.substring(res.indexOf(" "));
-                request.Purpose = param;
-            }else if(res.contains("Upgrade-Insecure-Requests:"))
-            {
-                String param = res.substring(res.indexOf(" "));
-                request.Upgrade_Insecure_Requests = param;
-            }else if(res.contains("User-Agent:"))
-            {
-                String param = res.substring(res.indexOf(" "));
-                request.User_Agent = param;
-            }else if(res.contains("Accept:"))
-            {
-                String param = res.substring(res.indexOf(" "));
-                request.Accept = param;
-            }else if(res.contains("Accept-Encoding:"))
-            {
-                String param = res.substring(res.indexOf(" "));
-                request.Accept_Encoding = param;
-            }else if(res.contains("Accept-Language:"))
-            {
-                String param = res.substring(res.indexOf(" "));
-                request.Accept_Language = param;
             }
-
         }
 
         return request;
