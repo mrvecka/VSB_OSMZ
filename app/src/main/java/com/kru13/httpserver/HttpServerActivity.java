@@ -144,12 +144,12 @@ public class HttpServerActivity extends AppCompatActivity implements OnClickList
 		@Override
 		public void handleMessage(Message msg)
 		{
-			Bundle bndl = msg.getData();
-			ResponseMessage m = (ResponseMessage) bndl.getSerializable("REQUEST");
-			Messages.add("Data send to: " + m.Host);
-			Messages.add("Requested file: "+m.FileName);
-			Messages.add("Data size: "+m.ResponseSize);
-			arrayAdapter.notifyDataSetChanged();
+//			Bundle bndl = msg.getData();
+//			ResponseMessage m = (ResponseMessage) bndl.getSerializable("REQUEST");
+//			Messages.add("Data send to: " + m.Host);
+//			Messages.add("Requested file: "+m.FileName);
+//			Messages.add("Data size: "+m.ResponseSize);
+//			arrayAdapter.notifyDataSetChanged();
 		}
 	};
 

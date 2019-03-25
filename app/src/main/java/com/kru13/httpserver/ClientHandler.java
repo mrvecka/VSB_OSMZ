@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -66,8 +67,17 @@ public class ClientHandler extends Thread {
 
                 ArrayList<String> responses = new ArrayList<String>();
                 String response;
-                while(!(response = in.readLine()).isEmpty())
+                String firstLine = "";
+                while((response = in.readLine()) != null)
                 {
+                    if(firstLine.isEmpty())
+                    {
+                        firstLine = response;
+                    }
+                    else if (firstLine.contains("GET") && response.isEmpty())
+                    {
+                        break;
+                    }
                     responses.add(response);
                 }
                 HttpRequest request = HttpRequest.ParseRequest(responses);
@@ -88,7 +98,7 @@ public class ClientHandler extends Thread {
 
                             o.write(activity.GetPicture(),0,activity.GetPicture().length);
                         }
-                        else if (request.FileName.contains("/stream"))
+                        else if (request.FileName.contains("stream"))
                         {
                             stream = new DataOutputStream(s.getOutputStream());
                             if (stream != null)
@@ -185,9 +195,15 @@ public class ClientHandler extends Thread {
                         }
 
                     }
-                    else if(request.Method.toUpperCase().equals("PUT"))
+                    else if(request.Method.toUpperCase().equals("POST"))
                     {
-                        Log.d("SERVER","Put methode");
+                        if (request.Path.contains("upload"))
+                        {
+                            File data = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),"uploadedData.txt");
+                            BufferedWriter writer = new BufferedWriter(new FileWriter(data)); // When I debug, it comes up until here and then returns with the exception
+                            writer.write(request.ContentData);
+                            writer.close();
+                        }
 
                     }
                     else
