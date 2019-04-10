@@ -200,7 +200,7 @@ public class ClientHandler extends Thread {
                         if (request.Path.contains("upload"))
                         {
                             File data = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),"uploadedData.txt");
-                            BufferedWriter writer = new BufferedWriter(new FileWriter(data)); // When I debug, it comes up until here and then returns with the exception
+                            BufferedWriter writer = new BufferedWriter(new FileWriter(data));
                             writer.write(request.ContentData);
                             writer.close();
                         }
@@ -246,7 +246,6 @@ public class ClientHandler extends Thread {
         res += "Date: "+Calendar.getInstance().getTime()+ NEWLINE;
         res += "Server: "+ server + NEWLINE;
         res +="Content-Length: " + size + NEWLINE;
-        //res +="Connection: "+ conn + NEWLINE;
         res +=NEWLINE;
         return res;
     }
@@ -285,10 +284,10 @@ public class ClientHandler extends Thread {
         if (stream != null){
             try
             {
-                byte[] baos = activity.GetPicture();
+                byte[] pic = activity.GetPicture();
                 // buffer is a ByteArrayOutputStream
                 imageBuffer.reset();
-                imageBuffer.write(baos);
+                imageBuffer.write(pic);
                 imageBuffer.flush();
                 // write the content header
                 stream.write((NEWLINE +  boundary + NEWLINE +
@@ -299,7 +298,6 @@ public class ClientHandler extends Thread {
                 stream.write((NEWLINE ).getBytes());
 
                 stream.flush();
-                Log.d("onPreviewFrame", "succ");
             }
             catch (IOException e)
             {
